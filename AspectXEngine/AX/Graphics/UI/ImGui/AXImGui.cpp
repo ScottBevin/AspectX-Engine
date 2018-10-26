@@ -63,7 +63,7 @@ AXImGui::InitResult AXImGui::OnInitialize( )
 	io.DisplaySize.y = renderCore->GetSettings( ).mScreenHeight;
 	io.IniFilename = "imgui.cfg";
 	io.RenderDrawListsFn = nullptr;
-	io.ImeWindowHandle = (void*)(&window->GetWindowHandle( ));
+	io.ConfigFlags |= (ImGuiConfigFlags_DockingEnable);
 
 	// Create device objects
 
@@ -341,7 +341,7 @@ void AXImGui::Render( )
 
 	if( mShouldRenderImGuiDemoWindow )
 	{
-		//ImGui::ShowTestWindow( &mShouldRenderImGuiDemoWindow );
+		ImGui::ShowTestWindow( );
 	}
 
 	if( mShouldRenderImGuiMetricsWindow )
