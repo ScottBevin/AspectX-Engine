@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+
+#intermediate & output, files & directories
+.vs/*
+x64/*
+*/x64/*
+*.vcxproj.user
+
+#Unwanted configs
+imgui.cfg
