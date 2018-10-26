@@ -265,7 +265,7 @@ namespace ImGui
 
 				ItemSize( bb, 0.0f );
 
-				if( !ItemAdd( bb, &id ) )
+				if( !ItemAdd( bb, id ) )
 					return;
 
 				bool hovered, held;

@@ -42,6 +42,8 @@ struct VERTEX_CONSTANT_BUFFER
 */
 AXImGui::InitResult AXImGui::OnInitialize( )
 { 
+	ImGui::CreateContext(nullptr);
+
 	AXRenderCore* renderCore( AXRenderCore::GetFrom( AXApplication::Get( ) ) );
 	AXWindow* window( AXWindow::GetFrom( AXApplication::Get( ) ) );
 
@@ -277,7 +279,7 @@ void AXImGui::OnShutdown( )
 	if( g_pVertexShader ) { g_pVertexShader->Release( ); g_pVertexShader = NULL; }
 	if( g_pVertexShaderBlob ) { g_pVertexShaderBlob->Release( ); g_pVertexShaderBlob = NULL; }
 
-	ImGui::Shutdown( );
+	ImGui::Shutdown(ImGui::GetCurrentContext());
 }
 
 /**
@@ -339,7 +341,7 @@ void AXImGui::Render( )
 
 	if( mShouldRenderImGuiDemoWindow )
 	{
-		ImGui::ShowTestWindow( &mShouldRenderImGuiDemoWindow );
+		//ImGui::ShowTestWindow( &mShouldRenderImGuiDemoWindow );
 	}
 
 	if( mShouldRenderImGuiMetricsWindow )
@@ -604,6 +606,66 @@ void AXImGui::RegisterSystemDebugMenuItem( const AXString& path, SystemDebugMenu
 		curItem->mCallbackFunction = callbackFunction;
 	}
 }
+
+#if defined(AXPLATFORM_WINDOWS)
+
+/**
+* Windows function to handle input
+*/
+bool AXImGui::HandleWndProc(uint32_t umsg, uint64_t wparam, uint64_t lparam)
+{
+	if (ImGui::GetCurrentContext())
+	{
+		// Todo: Full of ImGui hacks
+		ImGuiIO& io = ImGui::GetIO();
+
+		switch (umsg)
+		{
+		case WM_LBUTTONDOWN:
+			io.MouseDown[0] = true;
+			return true;
+		case WM_LBUTTONUP:
+			io.MouseDown[0] = false;
+			return true;
+		case WM_RBUTTONDOWN:
+			io.MouseDown[1] = true;
+			return true;
+		case WM_RBUTTONUP:
+			io.MouseDown[1] = false;
+			return true;
+		case WM_MBUTTONDOWN:
+			io.MouseDown[2] = true;
+			return true;
+		case WM_MBUTTONUP:
+			io.MouseDown[2] = false;
+			return true;
+		case WM_MOUSEWHEEL:
+			io.MouseWheel += GET_WHEEL_DELTA_WPARAM(wparam) > 0 ? +1.0f : -1.0f;
+			return true;
+		case WM_MOUSEMOVE:
+			io.MousePos.x = (signed short)(lparam);
+			io.MousePos.y = (signed short)(lparam >> 16);
+			return true;
+		case WM_KEYDOWN:
+			if (wparam < 256)
+				io.KeysDown[wparam] = 1;
+			return true;
+		case WM_KEYUP:
+			if (wparam < 256)
+				io.KeysDown[wparam] = 0;
+			return true;
+		case WM_CHAR:
+			// You can also use ToAscii()+GetKeyboardState() to retrieve characters.
+			if (wparam > 0 && wparam < 0x10000)
+				io.AddInputCharacter((unsigned short)wparam);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+#endif // #if defined(AXPLATFORM_WINDOWS)
 
 /**
 * Renders out the system debug menu

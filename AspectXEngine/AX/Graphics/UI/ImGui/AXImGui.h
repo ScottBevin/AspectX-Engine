@@ -2,6 +2,11 @@
 
 #pragma once
 
+//#if defined(AXPLATFORM_WINDOWS)
+//#define WIN32_LEAN_AND_MEAN
+//#include <Windows.h>
+//#endif // #if defined(AXPLATFORM_WINDOWS)
+
 #include <functional>
 
 #include "AX/Core/AXSystem.h"
@@ -57,6 +62,13 @@ public:
 
 	template< class T >
 	static void RenderPropertyToImGuiHelper( T& val, const AXString& label );
+
+#if defined(AXPLATFORM_WINDOWS)
+	/**
+	* Windows function to handle input
+	*/
+	bool HandleWndProc(uint32_t umsg, uint64_t wparam, uint64_t lparam);
+#endif // #if defined(AXPLATFORM_WINDOWS)
 
 protected:
 

@@ -1,7 +1,6 @@
 // Copyright 2016 Scott Bevin, All Rights Reserved
 
 #define WIN32_LEAN_AND_MEAN
-
 #include <windows.h>
 
 #include "AX/Core/AXApplication.h"

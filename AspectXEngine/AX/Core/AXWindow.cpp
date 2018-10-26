@@ -1,6 +1,5 @@
 // Copyright 2016 Scott Bevin, All Rights Reserved
 
-#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 #include "AXWindow.h"
@@ -10,7 +9,7 @@
 #include "AX/Utils/AXUtils.h"
 
 #include "AX/Graphics/RenderCore/AXRenderCore.h"
-#include "Libs/IMGui/imgui.h"
+#include "AX/Graphics/UI/ImGui/AXImGui.h"
 
 AXString AXSystem< AXWindow >::sSystemName = "Window";
 
@@ -30,68 +29,29 @@ AXWindow::~AXWindow()
 	
 }
 
-LRESULT CALLBACK WndProc( HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam )
+LRESULT CALLBACK WndProc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
-	// Todo: Full of ImGui hacks
-	ImGuiIO& io = ImGui::GetIO( );
-
-	switch( umsg )
+	if (auto imGuiSys = AXImGui::GetFrom(AXApplication::Get()))
 	{
-		case WM_LBUTTONDOWN:
-			io.MouseDown[0] = true;
-			return true;
-		case WM_LBUTTONUP:
-			io.MouseDown[0] = false;
-			return true;
-		case WM_RBUTTONDOWN:
-			io.MouseDown[1] = true;
-			return true;
-		case WM_RBUTTONUP:
-			io.MouseDown[1] = false;
-			return true;
-		case WM_MBUTTONDOWN:
-			io.MouseDown[2] = true;
-			return true;
-		case WM_MBUTTONUP:
-			io.MouseDown[2] = false;
-			return true;
-		case WM_MOUSEWHEEL:
-			io.MouseWheel += GET_WHEEL_DELTA_WPARAM( wparam ) > 0 ? +1.0f : -1.0f;
-			return true;
-		case WM_MOUSEMOVE:
-			io.MousePos.x = ( signed short )( lparam );
-			io.MousePos.y = ( signed short )( lparam >> 16 );
-			return true;
-		case WM_KEYDOWN:
-			if( wparam < 256 )
-				io.KeysDown[wparam] = 1;
-			return true;
-		case WM_KEYUP:
-			if( wparam < 256 )
-				io.KeysDown[wparam] = 0;
-			return true;
-		case WM_CHAR:
-			// You can also use ToAscii()+GetKeyboardState() to retrieve characters.
-			if( wparam > 0 && wparam < 0x10000 )
-				io.AddInputCharacter( ( unsigned short )wparam );
-			return true;
-
-		case WM_QUIT:
-		case WM_CLOSE:
-		case WM_DESTROY:
+		if (imGuiSys->HandleWndProc(umsg, wparam, lparam))
 		{
-			AXApplication::Get( ).Quit( );
 			return true;
-
-		} break;
-
-		default:
-		{
-			return DefWindowProc( hwnd, umsg, wparam, lparam );
 		}
 	}
 
-	return 0;
+	switch (umsg)
+	{
+	case WM_QUIT:
+	case WM_CLOSE:
+	case WM_DESTROY:
+	{
+		AXApplication::Get().Quit();
+		return true;
+
+	} break;
+	}
+
+	return DefWindowProc(hwnd, umsg, wparam, lparam);;
 }
 
 /**
